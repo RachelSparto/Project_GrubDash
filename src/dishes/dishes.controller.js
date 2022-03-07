@@ -62,17 +62,17 @@ function dishExists(req, res, next) {
   next();
 }
 
-function validateId(req, res, next) {
-  const dishId = req.params.dishId;
-  const { data: { id } = {} } = req.body;
-  if (dishId !== id) {
-    return next({
-      status: 400,
-      message: `Body id does not match route id: ${id}, ${dishId}`,
-    });
-  }
-  next();
-}
+// function validateId(req, res, next) {
+//   const dishId = req.params.dishId;
+//   const { data: { id } = {} } = req.body;
+//   if (dishId !== id){
+//     return next({
+//       status: 400,
+//       message: `Body id does not match route id: ${id}, ${dishId}`,
+//     });
+//   }
+//   next()
+// }
 
 function list(req, res) {
   res.json({ data: dishes });
@@ -95,11 +95,25 @@ function read(req, res) {
   res.json({ data: res.locals.dish });
 }
 
-function update(req, res) {}
+function update(req, res) {
+  const { dish } = res.locals;
+  const { dishId } = req.params;
+  const { data: { name, description, price, image_url } = {} } = req.body;
+  const updateDish = {
+    ...dish,
+    name,
+    description,
+    price,
+    image_url,
+  };
+  const index = dishes.findIndex((dish) => dish.id === dishId);
+  dishes[index] = updateDish;
+  res.status(200).json({ data: updateDish });
+}
 
 module.exports = {
   list,
   create: [validateDataFields, create],
   read: [dishExists, read],
-  update: [dishExists, validateId, validateDataFields, update],
+  update: [dishExists, validateDataFields, update],
 };
