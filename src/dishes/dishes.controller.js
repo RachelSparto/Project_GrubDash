@@ -62,17 +62,20 @@ function dishExists(req, res, next) {
   next();
 }
 
-// function validateId(req, res, next) {
-//   const dishId = req.params.dishId;
-//   const { data: { id } = {} } = req.body;
-//   if (dishId !== id){
-//     return next({
-//       status: 400,
-//       message: `Body id does not match route id: ${id}, ${dishId}`,
-//     });
-//   }
-//   next()
-// }
+function validateId(req, res, next) {
+  const { dishId } = req.params;
+  const { data: { id } = {} } = req.body;
+  if (dishId !== id) {
+    if (id === "" || id === null || id === undefined) {
+      next();
+    }
+    return next({
+      status: 400,
+      message: `Body id does not match route id: ${id}, ${dishId}`,
+    });
+  }
+  next();
+}
 
 function list(req, res) {
   res.json({ data: dishes });
@@ -115,5 +118,5 @@ module.exports = {
   list,
   create: [validateDataFields, create],
   read: [dishExists, read],
-  update: [dishExists, validateDataFields, update],
+  update: [dishExists, validateId, validateDataFields, update],
 };
